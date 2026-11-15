@@ -19,10 +19,14 @@ preview updates as you go and your work is saved in the browser as you type.
 When you are happy with it:
 
 1. Press **Print / Save as PDF**.
-2. In the print dialog choose **Save as PDF** as the destination, **Default**
+2. A short dialog lists the print settings below; press **Continue to print**.
+3. In the print dialog choose **Save as PDF** as the destination, **Default**
    margins (the template sets them), **100%** scale, and turn **headers and
    footers** off.
-3. Save. Chrome names the file after the name in your CV.
+4. Save. Chrome names the file after the name in your CV.
+
+Once you know the settings, tick **Don't show this again** and the button goes
+straight to printing. **Print settings** in the footer brings the dialog back.
 
 Because the CV is stored only in this browser, clearing your browser data
 deletes it. Use **Export JSON** now and then to keep a copy, and **Import

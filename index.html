@@ -39,7 +39,7 @@
         <div class="preview-toolbar">
           <button type="button" class="btn primary" id="printButton">Print / Save as PDF</button>
           <span class="pages" id="pages"></span>
-          <button type="button" class="btn" id="focusButton">Focus</button>
+          <button type="button" class="btn" id="focusButton" aria-pressed="false">Focus</button>
           <label class="zoom-label">
             Zoom
             <select id="zoom">
@@ -48,20 +48,6 @@
               <option value="1">100%</option>
             </select>
           </label>
-        </div>
-
-        <div class="print-tips" id="printTips">
-          <div>
-            <strong>In the print dialog:</strong>
-            <ol>
-              <li>Destination: <b>Save as PDF</b></li>
-              <li>Margins: <b>Default</b> — the template sets them</li>
-              <li>Scale: <b>100%</b></li>
-              <li>Headers and footers: <b>off</b></li>
-              <li>Background graphics: <b>on</b></li>
-            </ol>
-          </div>
-          <button type="button" class="mini" id="dismissTips">Got it</button>
         </div>
 
         <div class="sheet-wrap" id="sheetWrap">
@@ -78,18 +64,43 @@
     </div>
 
     <footer class="footer">
-      <span
-        >Stored only on this device; nobody else can see it. Clearing your browser data deletes
-        your CV — export JSON now and then.</span
-      >
-      <a href="LICENSE">MIT License</a>
-      <a
-        href="https://github.com/bassam-alaraby/cv-builder/blob/main/docs/TEMPLATE-CONTRACT.md"
-        target="_blank"
-        rel="noopener"
-        >Add a template</a
-      >
+      <p class="footer-note">
+        Stored only on this device; nobody else can see it. Clearing your browser data deletes your
+        CV — export JSON now and then.
+      </p>
+      <nav class="footer-links" aria-label="Footer">
+        <button type="button" id="printTipsButton">Print settings</button>
+        <a href="LICENSE">MIT License</a>
+        <a
+          href="https://github.com/bassam-alaraby/cv-builder/blob/main/docs/TEMPLATE-CONTRACT.md"
+          target="_blank"
+          rel="noopener"
+          >Add a template</a
+        >
+      </nav>
     </footer>
+
+    <dialog id="printDialog" aria-labelledby="printDialogTitle">
+      <h2 id="printDialogTitle">Before you print</h2>
+      <div class="print-tips">
+        <p>Set these in the browser's print dialog. They keep the PDF looking like the preview.</p>
+        <ol>
+          <li>Destination: <b>Save as PDF</b></li>
+          <li>Margins: <b>Default</b> — the template sets them</li>
+          <li>Scale: <b>100%</b></li>
+          <li>Headers and footers: <b>off</b></li>
+          <li>Background graphics: <b>on</b></li>
+        </ol>
+      </div>
+      <label class="print-remember">
+        <input type="checkbox" id="printTipsDismiss" />
+        Don't show this again
+      </label>
+      <div class="dialog-actions">
+        <button type="button" class="btn" data-close>Cancel</button>
+        <button type="button" class="btn primary" id="continuePrint">Continue to print</button>
+      </div>
+    </dialog>
 
     <dialog id="howDialog">
       <h2>How it works</h2>

@@ -1,4 +1,4 @@
-import { buildForm, focusAutofocus } from './form.js';
+import { buildForm, firstEntryFieldPath, openRow, sectionKeyForPath, updateRows } from './form.js';
 import {
   addContactItem,
   addContactRow,
@@ -18,6 +18,7 @@ import {
 import { setPath } from './paths.js';
 import {
   estimatePages,
+  focusField,
   initPreviewInteraction,
   loadTemplate,
   pagesLabel,
@@ -33,6 +34,7 @@ import {
   saveUI,
 } from './storage.js';
 import { validateDocument } from './schema.js';
+import { MOBILE_LAYOUT, focusModeFor } from './layout.js';
 import { currentTemplate } from '../templates/index.js';
 
 const els = {
@@ -42,15 +44,20 @@ const els = {
   wrap: document.getElementById('sheetWrap'),
   pages: document.getElementById('pages'),
   zoom: document.getElementById('zoom'),
-  tips: document.getElementById('printTips'),
   status: document.getElementById('status'),
   file: document.getElementById('fileInput'),
+  focus: document.getElementById('focusButton'),
+  printDialog: document.getElementById('printDialog'),
+  printDismiss: document.getElementById('printTipsDismiss'),
 };
+
+const mobileLayout = window.matchMedia(MOBILE_LAYOUT);
 
 let doc = null;
 let template = null;
 let sample = null;
 let ui = loadUI();
+let openKey = 'profile';
 
 async function start() {
   template = await loadTemplate(currentTemplate.id);
@@ -61,26 +68,59 @@ async function start() {
   if (!stored) saveDocument(doc);
 
   els.zoom.value = ui.zoom || 'fit';
-  els.tips.hidden = Boolean(ui.tipsDismissed);
-  if (window.matchMedia('(max-width: 980px)').matches) {
+  if (mobileLayout.matches) {
     document.body.classList.add('tab-edit');
   }
 
-  buildForm(els.form, doc);
-  initPreviewInteraction(els.sheet, els.form);
+  // A reload always lands on a section: an empty index is not a place to start.
+  openKey = ui.openSection || 'profile';
+
+  buildForm(els.form, doc, openKey);
+  setFocusMode(ui.focusMode);
+  initPreviewInteraction(els.sheet, els.form, selectField);
   wire();
   commit();
+}
+
+// Which section of the form is open.
+function openSection() {
+  return openKey;
+}
+
+// Opening a row happens in place: rebuilding the form would take the
+// visitor's focus, scroll position and half typed word with it.
+function setOpenSection(key) {
+  openKey = key;
+  ui.openSection = key;
+  saveUI(ui);
+  openRow(els.form, key);
+}
+
+// Clicking a word in the preview opens the section that holds it, then puts
+// the cursor in the field itself.
+function selectField(path) {
+  const key = sectionKeyForPath(path);
+  if (key && openSection() !== key) setOpenSection(key);
+  focusField(els.form, path);
 }
 
 function commit() {
   saveDocument(doc);
   renderPreview(els.sheet, template, toTemplateData(doc));
+  updateRows(els.form, doc);
   document.title = (doc.profile.name || '').trim() || 'CV Builder';
   requestAnimationFrame(updateLayout);
 }
 
 function rebuildForm() {
-  buildForm(els.form, doc);
+  buildForm(els.form, doc, openKey);
+  // An imported CV can drop the section that was open; land somewhere real.
+  if (!els.form.querySelector(`[data-sec="${CSS.escape(openKey)}"]`)) {
+    openKey = 'profile';
+    ui.openSection = openKey;
+    saveUI(ui);
+    openRow(els.form, openKey);
+  }
   commit();
 }
 
@@ -97,11 +137,33 @@ function updateLayout() {
 }
 
 function setTab(name) {
+  // A pane hidden by a stale focus state would leave the tab blank.
+  if (document.body.classList.contains('focus-mode')) setFocusMode(false);
   document.body.classList.toggle('tab-edit', name === 'edit');
   document.body.classList.toggle('tab-preview', name === 'preview');
   for (const button of document.querySelectorAll('[data-tab]')) {
     button.setAttribute('aria-selected', String(button.dataset.tab === name));
   }
+  updateLayout();
+}
+
+// The print tips live in a dialog so the preview keeps its full height. The
+// dialog's return value decides whether the browser's print dialog follows.
+function openPrintDialog() {
+  els.printDismiss.checked = Boolean(ui.printTipsDismissed);
+  els.printDialog.returnValue = '';
+  els.printDialog.showModal();
+}
+
+// Focus mode is desktop only: it hides the form pane, which on the tab layout
+// is the Edit tab. Leaving it must never be a one way trip.
+function setFocusMode(on) {
+  const active = focusModeFor(on, mobileLayout.matches);
+  document.body.classList.toggle('focus-mode', active);
+  els.focus.setAttribute('aria-pressed', String(active));
+  els.focus.textContent = active ? 'Exit focus' : 'Focus';
+  ui.focusMode = active;
+  saveUI(ui);
   updateLayout();
 }
 
@@ -139,11 +201,19 @@ function wire() {
     const index = Number(target.dataset.index);
     const row = Number(target.dataset.row);
     const section = target.dataset.section;
+    let pendingFocus = null;
 
     switch (action) {
-      case 'entry-add':
-        addEntry(doc, section);
+      case 'sec-toggle': {
+        const key = target.dataset.sec;
+        setOpenSection(openSection() === key ? null : key);
+        return;
+      }
+      case 'entry-add': {
+        const added = addEntry(doc, section);
+        pendingFocus = firstEntryFieldPath(section, added);
         break;
+      }
       case 'entry-remove':
         removeEntry(doc, section, index);
         break;
@@ -153,9 +223,14 @@ function wire() {
       case 'entry-down':
         moveEntry(doc, section, index, 1);
         break;
-      case 'custom-add':
-        addCustomSection(doc);
+      case 'custom-add': {
+        const added = addCustomSection(doc);
+        openKey = `custom[${added}]`;
+        ui.openSection = openKey;
+        saveUI(ui);
+        pendingFocus = `sections.custom[${added}].heading`;
         break;
+      }
       case 'custom-remove':
         removeCustomSection(doc, index);
         break;
@@ -184,14 +259,26 @@ function wire() {
         return;
     }
     rebuildForm();
+    if (pendingFocus) focusField(els.form, pendingFocus);
   });
 
-  document.getElementById('printButton').addEventListener('click', () => window.print());
-  document.getElementById('dismissTips').addEventListener('click', () => {
-    els.tips.hidden = true;
-    ui.tipsDismissed = true;
+  // Printing starts with the settings the PDF needs; the tips can be silenced
+  // once the user knows them, and the footer re-opens them.
+  document.getElementById('printButton').addEventListener('click', () => {
+    if (ui.printTipsDismissed) window.print();
+    else openPrintDialog();
+  });
+
+  els.printDialog.addEventListener('close', () => {
+    if (els.printDialog.returnValue === 'print') window.print();
+  });
+
+  els.printDismiss.addEventListener('change', () => {
+    ui.printTipsDismissed = els.printDismiss.checked;
     saveUI(ui);
   });
+
+  document.getElementById('printTipsButton').addEventListener('click', openPrintDialog);
 
   document.getElementById('exportButton').addEventListener('click', () => {
     const name = (doc.profile.name || 'cv').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
@@ -232,9 +319,22 @@ function wire() {
     updateLayout();
   });
 
-  document.getElementById('focusButton').addEventListener('click', () => {
-    document.body.classList.toggle('focus-mode');
-    updateLayout();
+  els.focus.addEventListener('click', () => {
+    setFocusMode(!document.body.classList.contains('focus-mode'));
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || !document.body.classList.contains('focus-mode')) return;
+    if (document.getElementById('howDialog').open) return;
+    setFocusMode(false);
+    els.focus.focus();
+  });
+
+  // Rotating a phone or shrinking the window into the tab layout drops focus
+  // mode, so the form is never left hidden behind it.
+  mobileLayout.addEventListener('change', () => {
+    if (mobileLayout.matches) setTab('edit');
+    else updateLayout();
   });
 
   for (const button of document.querySelectorAll('[data-tab]')) {
@@ -250,6 +350,13 @@ function wire() {
   const dialog = document.getElementById('howDialog');
   document.getElementById('howButton').addEventListener('click', () => dialog.showModal());
   dialog.querySelector('[data-close]').addEventListener('click', () => dialog.close());
+
+  els.printDialog.querySelector('[data-close]').addEventListener('click', () => {
+    els.printDialog.close('cancel');
+  });
+  document.getElementById('continuePrint').addEventListener('click', () => {
+    els.printDialog.close('print');
+  });
 
   let resizeTimer = null;
   window.addEventListener('resize', () => {

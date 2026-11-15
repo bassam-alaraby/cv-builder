@@ -6,6 +6,9 @@
   --line: #e3e5e8;
   --accent: #1c4ed8;
   --danger: #b42318;
+  --note-bg: #fffbeb;
+  --note-line: #fde68a;
+  --note-ink: #78350f;
   --page-margin: 12mm 14mm;
   --radius: 10px;
 }
@@ -137,21 +140,26 @@ button {
   color: var(--ink);
 }
 
+/* Instruction Amber: the one warm surface, earned by being the block that
+   gives instructions rather than taking input. It now lives in the dialog. */
 .print-tips {
-  background: #fffbeb;
-  border: 1px solid #fde68a;
+  background: var(--note-bg);
+  border: 1px solid var(--note-line);
   border-radius: 8px;
-  padding: 0.5rem 0.7rem;
-  font-size: 0.8rem;
-  color: #78350f;
-  display: flex;
-  gap: 0.6rem;
-  align-items: flex-start;
+  padding: 0.75rem 0.85rem;
+  font-size: 0.82rem;
+  color: var(--note-ink);
+}
+
+.print-tips p {
+  margin: 0 0 0.4rem;
 }
 
 .print-tips ol {
-  margin: 0.2rem 0;
+  margin: 0;
   padding-left: 1.1rem;
+  display: grid;
+  gap: 0.15rem;
 }
 
 .sheet-wrap {
@@ -217,32 +225,156 @@ button {
   color: var(--muted);
 }
 
-.block-head {
+/* ── the form is an index of the CV: one row per section ── */
+
+.sec {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.sec.is-open .sec-head {
+  border-bottom: 1px solid var(--line);
+}
+
+.sec-head:hover {
+  background: #f7f8fa;
+}
+
+.sec-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0 0.85rem;
+  min-height: 44px;
+}
+
+.sec-toggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.6rem;
+  padding: 0.6rem 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.sec-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -3px;
+  border-radius: 6px;
+}
+
+.chev {
+  display: flex;
+  color: var(--muted);
+}
+
+.chev svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 120ms ease;
+}
+
+.sec.is-open .chev {
+  color: var(--accent);
+}
+
+.sec.is-open .chev svg {
+  transform: rotate(90deg);
 }
 
 .sec-name {
-  font: inherit;
   font-weight: 600;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  padding: 0.2rem 0.35rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.sec-toggle .state {
+  flex: none;
+  margin-left: auto;
+}
+
+.sec.is-open .sec-name {
+  color: var(--accent);
+}
+
+.state {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.05rem 0.5rem;
+  border-radius: 99px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.state svg {
+  width: 13px;
+  height: 13px;
+}
+
+.state.is-complete {
+  color: var(--accent);
+  background: #eef3ff;
+}
+
+.sec-body {
+  padding: 0.6rem 0.85rem 0.85rem;
+}
+
+.sec-body[hidden] {
+  display: none;
+}
+
+.sec-meta {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  padding-bottom: 0.35rem;
+}
+
+.sec-meta .fld {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.sec-meta .toggle {
+  padding-bottom: 0.45rem;
+}
+
+.custom-add {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.custom-add .mini {
   width: 100%;
+  text-align: left;
+  font-size: 0.9rem;
+  padding: 0.65rem 0.85rem 0.65rem 2.35rem;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
   background: transparent;
 }
 
-.sec-name:hover {
-  border-color: var(--line);
+.custom-add .mini:hover {
+  border-color: var(--accent);
+  color: var(--ink);
 }
 
-.sec-name:focus {
-  outline: none;
-  border-color: var(--accent);
-  background: var(--panel);
+.custom-add .hint {
+  margin: 0;
+  padding-left: 2.35rem;
 }
 
 .hint {
@@ -358,7 +490,23 @@ button {
 
 .citem-actions {
   display: flex;
-  gap: 0.2rem;
+  gap: 0.1rem;
+}
+
+.citem-actions .mini {
+  width: 1.6rem;
+  padding: 0.25rem 0;
+  text-align: center;
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+  line-height: 1.2;
+}
+
+.citem-actions .mini:hover {
+  border-color: var(--line);
+  background: var(--panel);
+  color: var(--ink);
 }
 
 /* ── buttons ── */
@@ -385,6 +533,13 @@ button {
 
 .btn.danger {
   color: var(--danger);
+}
+
+/* Focus mode is a toggle: the button says so while it is on. */
+.btn[aria-pressed='true'] {
+  color: var(--accent);
+  background: #eef3ff;
+  border-color: var(--accent);
 }
 
 .mini {
@@ -422,16 +577,58 @@ button {
 
 .footer {
   padding: 1rem 1.2rem 2rem;
-  color: var(--muted);
+  /* One step darker than Muted Ink: at 12.8px on the grey ground the shared
+     token lands at 4.32:1, below the 4.5 body floor. */
+  color: #5f6673;
   font-size: 0.8rem;
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem 1.5rem;
   flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
   border-top: 1px solid var(--line);
 }
 
-.footer a {
-  color: var(--muted);
+.footer-note {
+  margin: 0;
+  max-width: 62ch;
+}
+
+.footer-links {
+  display: flex;
+  gap: 0.25rem 0.9rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.footer a,
+.footer button {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+  transition: color 120ms ease, text-decoration-color 120ms ease;
+}
+
+.footer button {
+  font: inherit;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.footer a:hover,
+.footer button:hover {
+  color: var(--ink);
+  text-decoration-color: currentColor;
+}
+
+.footer a:focus-visible,
+.footer button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
 dialog {
@@ -439,7 +636,10 @@ dialog {
   border-radius: 12px;
   padding: 1.1rem 1.2rem;
   max-width: 32rem;
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
   color: var(--ink);
+  background: var(--panel);
 }
 
 dialog::backdrop {
@@ -459,7 +659,94 @@ dialog ol {
 .dialog-actions {
   display: flex;
   justify-content: flex-end;
+  gap: 0.5rem;
   margin-top: 1rem;
+}
+
+.print-remember {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.9rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.print-remember input {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  margin: 0;
+}
+
+/* ── motion ──
+   The dialog is the one arrival worth animating: it interrupts the workbench.
+   Everything else is feedback, kept to a single fast property per control. */
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+}
+
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+}
+
+dialog[open] {
+  animation: dialog-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+dialog[open]::backdrop {
+  animation: scrim-in 180ms ease-out;
+}
+
+.btn,
+.mini {
+  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease,
+    transform 90ms ease;
+}
+
+.btn:active,
+.mini:active {
+  transform: translateY(1px);
+}
+
+/* The row's body opens in place: a short fade makes the swap legible without
+   moving the fields the visitor is about to type in. */
+.sec-body:not([hidden]) {
+  animation: body-in 140ms ease-out;
+}
+
+@keyframes body-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog[open],
+  dialog[open]::backdrop,
+  .sec-body:not([hidden]) {
+    animation: none;
+  }
+
+  .chev svg,
+  .btn,
+  .mini,
+  .footer a,
+  .footer button {
+    transition: none;
+  }
+
+  .btn:active,
+  .mini:active {
+    transform: none;
+  }
 }
 
 .tabs {
@@ -504,8 +791,24 @@ dialog ol {
     box-shadow: inset 0 2px 0 var(--accent);
   }
 
-  body.tab-edit .preview-pane,
-  body.tab-preview .form-pane {
+  /* Screen only: the print engine lays the page out at A4 width (~794px), which
+     falls inside this breakpoint. Without the guard it would apply the tab rule
+     to the printout and hide the preview, printing a blank page. */
+  @media screen {
+    body.tab-edit .preview-pane,
+    body.tab-preview .form-pane {
+      display: none;
+    }
+  }
+
+  /* The fixed tab bar sits over the page's last row: keep the footer clear of it. */
+  .footer {
+    padding-bottom: 4.4rem;
+  }
+
+  /* Focus mode only exists in the side-by-side layout: on the tabs the preview
+     already has the whole width, and hiding the form would trap the Edit tab. */
+  #focusButton {
     display: none;
   }
 
@@ -518,15 +821,25 @@ dialog ol {
   .citem {
     grid-template-columns: 1fr;
   }
+
+  /* Stacked, the row's four controls read as a cluster belonging to the row
+     above them, so they sit at its trailing edge rather than under its left. */
+  .citem-actions {
+    justify-content: flex-end;
+    margin-top: -0.15rem;
+  }
 }
 
-body.focus-mode .form-pane,
-body.focus-mode .footer {
-  display: none;
-}
+/* Scoped to the split layout: on the tabs this rule would hide the Edit pane. */
+@media (min-width: 981px) {
+  body.focus-mode .form-pane,
+  body.focus-mode .footer {
+    display: none;
+  }
 
-body.focus-mode .layout {
-  grid-template-columns: 1fr;
+  body.focus-mode .layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ── print ── */
@@ -535,7 +848,6 @@ body.focus-mode .layout {
   .topbar,
   .form-pane,
   .preview-toolbar,
-  .print-tips,
   .tabs,
   .footer,
   dialog {

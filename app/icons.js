@@ -1,6 +1,6 @@
-// Built-in outline icons, one per contact type. Generic shapes only, so the
-// project ships no brand marks. Every icon is aria-hidden: it carries no text
-// and never reaches the printed words.
+// Built-in outline icons: one per contact type, plus the two the editor uses.
+// Generic shapes only, so the project ships no brand marks. Every icon is
+// aria-hidden: it carries no text and never reaches the printed words.
 
 const svg = (body) =>
   `<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" ` +
@@ -16,6 +16,8 @@ export const icons = {
   location: svg('<path d="M8 14.4s5-4.6 5-8a5 5 0 1 0-10 0c0 3.4 5 8 5 8Z"/><circle cx="8" cy="6.4" r="1.8"/>'),
   x: svg('<circle cx="8" cy="8" r="4.6"/><path d="M8 6.6v2.8"/><path d="M11 9.4a3.1 3.1 0 0 1-6 0"/>'),
   other: svg('<path d="M6.6 9.4 9.4 6.6"/><path d="M7.1 12.1 5.6 13.6a2.9 2.9 0 0 1-4.1-4.1L3 8"/><path d="M8.9 3.9l1.5-1.5a2.9 2.9 0 0 1 4.1 4.1L13 8"/>'),
+  check: svg('<path d="M3.2 8.6 6.4 11.8 12.8 4.8"/>'),
+  chevron: svg('<path d="M6.2 3.4 10.8 8l-4.6 4.6"/>'),
 };
 
 export function icon(type) {

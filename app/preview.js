@@ -45,12 +45,12 @@ export function pagesLabel(pages) {
 }
 
 // Clicking a word in the preview jumps to the control that edits it.
-export function initPreviewInteraction(sheet, formRoot) {
+export function initPreviewInteraction(sheet, formRoot, onSelect) {
   sheet.addEventListener('click', (event) => {
     const field = event.target.closest('[data-field]');
     if (!field) return;
     event.preventDefault();
-    focusField(formRoot, field.dataset.field);
+    onSelect(field.dataset.field);
   });
 
   formRoot.addEventListener('focusin', (event) => {
