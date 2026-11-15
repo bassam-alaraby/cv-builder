@@ -1,0 +1,11 @@
+{
+  "name": "cv-builder",
+  "version": "1.0.0",
+  "description": "A free, open source CV builder: edit an ATS friendly resume template in the browser and save it as a PDF. No accounts, no server, your data stays on your device.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test test/"
+  }
+}

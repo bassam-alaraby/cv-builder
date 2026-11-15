@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CV Builder</title>
+    <meta
+      name="description"
+      content="A free, open source CV builder. Edit a clean, ATS friendly resume template in your browser and save it as a PDF. Your data never leaves your device."
+    />
+    <link rel="stylesheet" href="app/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="./"><span class="brand-mark">CV</span> Builder</a>
+      <nav class="topnav">
+        <button type="button" id="howButton">How it works</button>
+        <a href="https://github.com/bassam-alaraby/cv-builder" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="layout">
+      <section class="pane form-pane" aria-label="CV editor">
+        <div id="formPane"></div>
+
+        <div class="block">
+          <h2 class="block-title">Your file</h2>
+          <div class="actions">
+            <button type="button" class="btn" id="exportButton">Export JSON</button>
+            <button type="button" class="btn" id="importButton">Import JSON</button>
+            <button type="button" class="btn danger" id="resetButton">Reset</button>
+          </div>
+          <p class="status" id="status" role="status"></p>
+          <input type="file" id="fileInput" accept="application/json,.json" hidden />
+        </div>
+      </section>
+
+      <section class="pane preview-pane" aria-label="Preview">
+        <div class="preview-toolbar">
+          <button type="button" class="btn primary" id="printButton">Print / Save as PDF</button>
+          <span class="pages" id="pages"></span>
+          <button type="button" class="btn" id="focusButton">Focus</button>
+          <label class="zoom-label">
+            Zoom
+            <select id="zoom">
+              <option value="fit">Fit</option>
+              <option value="0.75">75%</option>
+              <option value="1">100%</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="print-tips" id="printTips">
+          <div>
+            <strong>In the print dialog:</strong>
+            <ol>
+              <li>Destination: <b>Save as PDF</b></li>
+              <li>Margins: <b>Default</b> — the template sets them</li>
+              <li>Scale: <b>100%</b></li>
+              <li>Headers and footers: <b>off</b></li>
+              <li>Background graphics: <b>on</b></li>
+            </ol>
+          </div>
+          <button type="button" class="mini" id="dismissTips">Got it</button>
+        </div>
+
+        <div class="sheet-wrap" id="sheetWrap">
+          <div class="sheet-frame" id="sheetFrame">
+            <div class="sheet" id="sheet"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" data-tab="edit" aria-selected="true">Edit</button>
+      <button type="button" role="tab" data-tab="preview" aria-selected="false">Preview</button>
+    </div>
+
+    <footer class="footer">
+      <span
+        >Stored only on this device; nobody else can see it. Clearing your browser data deletes
+        your CV — export JSON now and then.</span
+      >
+      <a href="LICENSE">MIT License</a>
+      <a
+        href="https://github.com/bassam-alaraby/cv-builder/blob/main/docs/TEMPLATE-CONTRACT.md"
+        target="_blank"
+        rel="noopener"
+        >Add a template</a
+      >
+    </footer>
+
+    <dialog id="howDialog">
+      <h2>How it works</h2>
+      <ol>
+        <li>
+          Fill in the form. Everything is saved in this browser as you type, so you can close the
+          tab and come back later.
+        </li>
+        <li>
+          The page on the right is the real thing: it is exactly what the PDF will look like. Click
+          any word in it to jump back to the field that writes it.
+        </li>
+        <li>
+          Press <b>Print / Save as PDF</b>, choose <b>Save as PDF</b> as the destination, and the
+          PDF lands in your downloads folder.
+        </li>
+      </ol>
+      <p>There is no account and no server. Your CV never leaves your device.</p>
+      <div class="dialog-actions">
+        <button type="button" class="btn" data-close>Close</button>
+      </div>
+    </dialog>
+
+    <noscript>
+      <p style="padding: 1rem">CV Builder needs JavaScript: the whole app runs in your browser.</p>
+    </noscript>
+
+    <script type="module" src="app/main.js"></script>
+  </body>
+</html>
